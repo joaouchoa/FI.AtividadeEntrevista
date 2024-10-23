@@ -10,11 +10,23 @@ $(document).ready(function () {
         $('#formCadastro #Cidade').val(obj.Cidade);
         $('#formCadastro #Logradouro').val(obj.Logradouro);
         $('#formCadastro #Telefone').val(obj.Telefone);
+        $('#formCadastro #CPF').val(toCPFFormat(obj.CPF));
     }
 
     $('#formCadastro').submit(function (e) {
         e.preventDefault();
-        
+
+        e.preventDefault();
+
+        const cpfValue = $(this).find("#CPF").val();
+
+        if (!isValidCPF(cpfValue)) {
+            ModalDialog("Ocorreu um erro", "Por favor, insira um CPF válido.");
+            return;
+        }
+
+        const cpf = cpfValue.replace(/\./g, '').replace(/\-/g, '');
+
         $.ajax({
             url: urlPost,
             method: "POST",
@@ -27,7 +39,8 @@ $(document).ready(function () {
                 "Estado": $(this).find("#Estado").val(),
                 "Cidade": $(this).find("#Cidade").val(),
                 "Logradouro": $(this).find("#Logradouro").val(),
-                "Telefone": $(this).find("#Telefone").val()
+                "Telefone": $(this).find("#Telefone").val(),
+                "CPF": cpf
             },
             error:
             function (r) {
@@ -70,3 +83,11 @@ function ModalDialog(titulo, texto) {
     $('body').append(texto);
     $('#' + random).modal('show');
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const cpfInput = document.getElementById('CPF');
+
+    cpfInput.addEventListener('input', function () {
+        this.value = toCPFFormat(this.value);
+    });
+});

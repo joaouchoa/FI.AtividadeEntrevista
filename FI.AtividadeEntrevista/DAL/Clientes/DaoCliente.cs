@@ -27,8 +27,9 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("Logradouro", cliente.Logradouro));
             parametros.Add(new System.Data.SqlClient.SqlParameter("Email", cliente.Email));
             parametros.Add(new System.Data.SqlClient.SqlParameter("Telefone", cliente.Telefone));
+            parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", cliente.CPF));
 
-            DataSet ds = base.Consultar("FI_SP_IncClienteV2", parametros);
+            DataSet ds = base.Consultar("FI_SP_IncClienteV3", parametros);
             long ret = 0;
             if (ds.Tables[0].Rows.Count > 0)
                 long.TryParse(ds.Tables[0].Rows[0][0].ToString(), out ret);
@@ -45,8 +46,8 @@ namespace FI.AtividadeEntrevista.DAL
 
             parametros.Add(new System.Data.SqlClient.SqlParameter("Id", Id));
 
-            DataSet ds = base.Consultar("FI_SP_ConsCliente", parametros);
-            List<DML.Cliente> cli = Converter(ds);
+            DataSet ds = base.Consultar("FI_SP_ConsClienteV2", parametros);
+            List<DML.Cliente> cli = Converter(ds, true);
 
             return cli.FirstOrDefault();
         }
@@ -72,7 +73,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("crescente", crescente));
 
             DataSet ds = base.Consultar("FI_SP_PesqCliente", parametros);
-            List<DML.Cliente> cli = Converter(ds);
+            List<DML.Cliente> cli = Converter(ds, false);
 
             int iQtd = 0;
 
@@ -94,7 +95,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("Id", 0));
 
             DataSet ds = base.Consultar("FI_SP_ConsCliente", parametros);
-            List<DML.Cliente> cli = Converter(ds);
+            List<DML.Cliente> cli = Converter(ds, false);
 
             return cli;
         }
@@ -135,7 +136,7 @@ namespace FI.AtividadeEntrevista.DAL
             base.Executar("FI_SP_DelCliente", parametros);
         }
 
-        private List<DML.Cliente> Converter(DataSet ds)
+        private List<DML.Cliente> Converter(DataSet ds, bool needCPF)
         {
             List<DML.Cliente> lista = new List<DML.Cliente>();
             if (ds != null && ds.Tables != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -153,6 +154,8 @@ namespace FI.AtividadeEntrevista.DAL
                     cli.Nome = row.Field<string>("Nome");
                     cli.Sobrenome = row.Field<string>("Sobrenome");
                     cli.Telefone = row.Field<string>("Telefone");
+                    if(needCPF)
+                        cli.CPF = row.Field<string>("CPF");
                     lista.Add(cli);
                 }
             }
