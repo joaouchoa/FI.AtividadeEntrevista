@@ -26,21 +26,29 @@ namespace WebAtividadeEntrevista.Controllers
         public JsonResult Incluir(ClienteModel model)
         {
             BoCliente bo = new BoCliente();
-            
+
+            if (bo.VerificarExistencia(model.CPF))
+                ModelState.AddModelError("CPF", "Já existe um cadastro com esse CPF.");
+
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
                                       from error in item.Errors
                                       select error.ErrorMessage).ToList();
 
+                string errosFormatados = "";
+                foreach (var erro in erros)
+                {
+                    errosFormatados += $"<p>{erro}<p>";
+                }
+
                 Response.StatusCode = 400;
-                return Json(string.Join(Environment.NewLine, erros));
+                return Json(errosFormatados);
             }
             else
             {
-                
                 model.Id = bo.Incluir(new Cliente()
-                {                    
+                {
                     CEP = model.CEP,
                     Cidade = model.Cidade,
                     Email = model.Email,
@@ -53,7 +61,6 @@ namespace WebAtividadeEntrevista.Controllers
                     CPF = model.CPF
                 });
 
-           
                 return Json("Cadastro efetuado com sucesso");
             }
         }
@@ -62,15 +69,26 @@ namespace WebAtividadeEntrevista.Controllers
         public JsonResult Alterar(ClienteModel model)
         {
             BoCliente bo = new BoCliente();
-       
+
+            var result = bo.Consultar(model.Id);
+
+            if (!(bo.VerificarExistencia(model.CPF) && result.CPF == model.CPF))
+                ModelState.AddModelError("CPF", "Já existe um cadastro com esse CPF.");
+
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
                                       from error in item.Errors
                                       select error.ErrorMessage).ToList();
 
+                string errosFormatados = "";
+                foreach (var erro in erros)
+                {
+                    errosFormatados += $"<p>{erro}<p>";
+                }
+
                 Response.StatusCode = 400;
-                return Json(string.Join(Environment.NewLine, erros));
+                return Json(errosFormatados);
             }
             else
             {
