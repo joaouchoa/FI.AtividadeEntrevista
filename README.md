@@ -1,6 +1,6 @@
 # 📝 Sistema de Manutenção de Clientes
 
-Projeto desenvolvido em **ASP.NET MVC** e **.NET FRAMEWORK ** e para a manutenção de clientes, com funcionalidades de cadastramento e gerenciamento de beneficiários. O objetivo é avaliar o conhecimento técnico e a lógica de desenvolvimento do candidato para a vaga de desenvolvedor.
+Projeto desenvolvido em **ASP.NET MVC** e **.NET FRAMEWORK** e para a manutenção de clientes, com funcionalidades de cadastramento e gerenciamento de beneficiários. O objetivo é avaliar o conhecimento técnico e a lógica de desenvolvimento do candidato para a vaga de desenvolvedor.
 
 ## 🚀 Tecnologias Utilizadas
 - **ASP.NET MVC** - Framework para desenvolvimento web.
