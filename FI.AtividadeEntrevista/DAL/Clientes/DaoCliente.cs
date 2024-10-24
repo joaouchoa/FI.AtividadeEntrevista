@@ -104,7 +104,7 @@ namespace FI.AtividadeEntrevista.DAL
         /// Inclui um novo cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
-        internal void Alterar(DML.Cliente cliente)
+        internal bool Alterar(DML.Cliente cliente)
         {
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
 
@@ -119,7 +119,16 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("Telefone", cliente.Telefone));
             parametros.Add(new System.Data.SqlClient.SqlParameter("ID", cliente.Id));
 
-            base.Executar("FI_SP_AltCliente", parametros);
+            try 
+            {
+                base.Executar("FI_SP_AltCliente", parametros);
+
+                return true;
+            }
+            catch 
+            { 
+                return false;
+            }
         }
 
 

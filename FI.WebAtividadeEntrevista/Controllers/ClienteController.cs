@@ -6,6 +6,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
+using System.Runtime.InteropServices;
+using FI.WebAtividadeEntrevista.Models;
 
 namespace WebAtividadeEntrevista.Controllers
 {
@@ -20,6 +22,56 @@ namespace WebAtividadeEntrevista.Controllers
         public ActionResult Incluir()
         {
             return View();
+        }
+
+        [HttpPost]
+        public ActionResult DeletarBeneficiario(long id) 
+        {
+            BoBeneficiario bo = new BoBeneficiario();
+
+            var result = bo.Deletar(id);
+
+            if(result)
+                return Json(true);
+            else
+                return Json(false);
+        }
+
+        [HttpPost]
+        public ActionResult IncluirBeneficiario(BeneficiarioModel model)
+        {
+            BoBeneficiario bo = new BoBeneficiario();
+
+            //var result = bo.VerificarExistencia(model.ClientID, model.CPF);
+            if (bo.VerificarExistencia(model.ClientID, model.CPF))
+                ModelState.AddModelError("CPF", "Já existe um cadastro de Beneficiário vinculado a esse Cliente.");
+
+            if (!this.ModelState.IsValid)
+            {
+                List<string> erros = (from item in ModelState.Values
+                                      from error in item.Errors
+                                      select error.ErrorMessage).ToList();
+
+                string errosFormatados = "";
+                foreach (var erro in erros)
+                {
+                    errosFormatados += $"<p>{erro}<p>";
+                }
+
+                Response.StatusCode = 400;
+                return Json(errosFormatados);
+            }
+            else
+            {
+                model.Id = bo.Incluir(new Beneficiario()
+                {
+                    Nome = model.Nome,
+                    CPF = model.CPF,
+                    ClientID = model.ClientID
+                });
+
+                return Json("Cadastro efetuado com sucesso");
+            }
         }
 
         [HttpPost]
@@ -68,46 +120,91 @@ namespace WebAtividadeEntrevista.Controllers
         [HttpPost]
         public JsonResult Alterar(ClienteModel model)
         {
-            BoCliente bo = new BoCliente();
-
-            var result = bo.Consultar(model.Id);
-
-            if (!(bo.VerificarExistencia(model.CPF) && result.CPF == model.CPF))
-                ModelState.AddModelError("CPF", "Já existe um cadastro com esse CPF.");
-
-            if (!this.ModelState.IsValid)
+            try
             {
-                List<string> erros = (from item in ModelState.Values
-                                      from error in item.Errors
-                                      select error.ErrorMessage).ToList();
+                BoCliente bo = new BoCliente();
 
-                string errosFormatados = "";
-                foreach (var erro in erros)
+                var entity = bo.Consultar(model.Id);
+
+                if (entity == null)
                 {
-                    errosFormatados += $"<p>{erro}<p>";
+                    return Json("Beneficiário não encontrado.");
                 }
 
-                Response.StatusCode = 400;
-                return Json(errosFormatados);
-            }
-            else
-            {
-                bo.Alterar(new Cliente()
+                if (!this.ModelState.IsValid)
                 {
-                    Id = model.Id,
-                    CEP = model.CEP,
-                    Cidade = model.Cidade,
-                    Email = model.Email,
-                    Estado = model.Estado,
-                    Logradouro = model.Logradouro,
-                    Nacionalidade = model.Nacionalidade,
-                    Nome = model.Nome,
-                    Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone,
-                    CPF = model.CPF
-                });
-                               
-                return Json("Cadastro alterado com sucesso");
+                    List<string> erros = (from item in ModelState.Values
+                                          from error in item.Errors
+                                          select error.ErrorMessage).ToList();
+
+                    string errosFormatados = "";
+                    foreach (var erro in erros)
+                    {
+                        errosFormatados += $"<p>{erro}<p>";
+                    }
+
+                    Response.StatusCode = 400;
+                    return Json(errosFormatados);
+                }
+                else
+                {
+                    var atualizado = bo.Alterar(new Cliente()
+                    {
+                        Id = model.Id,
+                        CEP = model.CEP,
+                        Cidade = model.Cidade,
+                        Email = model.Email,
+                        Estado = model.Estado,
+                        Logradouro = model.Logradouro,
+                        Nacionalidade = model.Nacionalidade,
+                        Nome = model.Nome,
+                        Sobrenome = model.Sobrenome,
+                        Telefone = model.Telefone,
+                        CPF = model.CPF
+                    });
+
+                    if (atualizado)
+                    {
+                        return Json(new { Success = true, Message = "Cliente atualizado com sucesso." });
+                    }
+                    else
+                    {
+                        return Json(new { Success = false, Message = "Erro ao atualizar o Cliente." });
+                    }
+                }
+            }
+            catch (Exception ex) 
+            {
+                return Json(new { Success = false, Message = "Ocorreu um erro: " + ex.Message });
+            }
+            
+        }
+
+        [HttpPost]
+        public ActionResult AlterarBeneficiario(Beneficiario beneficiario)
+        {
+            try
+            {
+                var beneficiarioExistente = new BoBeneficiario().Consulta(beneficiario.Id);
+                if (beneficiarioExistente == null)
+                {
+                    return Json("Beneficiário não encontrado.");
+                }
+
+                var atualizado = new BoBeneficiario().Alterar(beneficiario);
+                if (atualizado)
+                {
+                    return Json(new { Success = true, Message = "Beneficiário atualizado com sucesso." });
+                }
+                else
+                {
+                    return Json(new { Success = false, Message = "Erro ao atualizar o beneficiário." });
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { Success = false, Message = "Ocorreu um erro: " + ex.Message });
             }
         }
 
@@ -135,10 +232,26 @@ namespace WebAtividadeEntrevista.Controllers
                     CPF = cliente.CPF
                 };
 
-            
+
             }
 
             return View(model);
+        }
+
+        [HttpGet]
+        public JsonResult BeneficiarioList(long CLIENTID)
+        {
+            try
+            {
+                List<Beneficiario> list = new BoBeneficiario().Listar(CLIENTID);
+
+                // Permite que o JSON seja retornado em uma requisição GET
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Result = "ERROR", Message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpPost]

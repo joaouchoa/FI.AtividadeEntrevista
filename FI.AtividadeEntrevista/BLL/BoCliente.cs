@@ -22,10 +22,10 @@ namespace FI.AtividadeEntrevista.BLL
         /// Altera um cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
-        public void Alterar(DML.Cliente cliente)
+        public bool Alterar(DML.Cliente cliente)
         {
             DAL.DaoCliente cli = new DAL.DaoCliente();
-            cli.Alterar(cliente);
+            return cli.Alterar(cliente);
         }
 
         /// <summary>

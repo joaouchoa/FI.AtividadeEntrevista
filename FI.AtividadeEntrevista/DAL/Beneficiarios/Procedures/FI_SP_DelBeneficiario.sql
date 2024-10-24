@@ -1,0 +1,16 @@
+﻿CREATE PROC FI_SP_DelBeneficiario
+    @ID BIGINT
+AS
+BEGIN
+    DELETE FROM BENEFICIARIOS
+    WHERE ID = @ID
+
+    IF @@ROWCOUNT > 0
+    BEGIN
+        SELECT 1 AS Result
+    END
+    ELSE
+    BEGIN
+        SELECT 0 AS Result
+    END
+END

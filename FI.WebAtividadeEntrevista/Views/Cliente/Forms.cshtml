@@ -82,7 +82,10 @@
         <div class="col-lg-12">
             <div class="pull-right">
                 <button type="submit" class="btn btn-sm btn-success">Salvar</button>
-                @Html.ActionLink("Voltar", "Index", "Cliente", new { }, new { @class = "btn btn-sm btn-danger" })
+                @Html.ActionLink("Voltar", "Index", "Cliente", new { }, new { @class = "btn btn-sm btn-danger", @id = "botaoVoltar" })
+            </div>
+            <div class="pull-left">
+                <button type="button" id="botaoBeneficiarios" class="btn btn-sm btn-primary" style="display:none;" onclick="abrirModalBeneficiarios()">Beneficiários</button>
             </div>
         </div>
     </div>
